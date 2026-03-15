@@ -7,7 +7,8 @@ A Windows GUI tool for automatically removing silence from OBS Studio screen rec
 - **Silence removal** powered by [auto-editor](https://github.com/WyattBlue/auto-editor)
 - **FCPXML export** for DaVinci Resolve (free version compatible)
 - **Batch processing** — select multiple clips, process them all at once
-- **Project folder workflow** — creates a folder in `~/Videos/`, moves clips into it, and generates a combined timeline
+- **Project folder workflow** — creates a folder in `~/Videos/`, moves clips into it, and generates individual + combined timelines
+- **Combined timeline** — merges all processed clips into a single FCPXML timeline with clips placed sequentially, ready to import as one timeline in DaVinci Resolve
 - **Presets** — Tutorial, Fast-paced, and Relaxed with adjustable threshold and margins
 - **Drag and drop** support (with tkinterdnd2)
 
