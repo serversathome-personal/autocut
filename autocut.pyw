@@ -492,7 +492,15 @@ class App:
         if paths:
             self._set_files(paths)
 
+    @staticmethod
+    def _natural_sort_key(p: str):
+        """Sort key that handles embedded numbers naturally (2 before 10)."""
+        import re
+        return [int(tok) if tok.isdigit() else tok.lower()
+                for tok in re.split(r'(\d+)', Path(p).name)]
+
     def _set_files(self, paths: list[str]) -> None:
+        paths = sorted(paths, key=self._natural_sort_key)
         self._batch_files = paths
         if len(paths) == 1:
             self.var_files.set(paths[0])
