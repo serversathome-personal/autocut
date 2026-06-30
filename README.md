@@ -16,12 +16,12 @@ A Windows GUI tool for automatically removing silence from OBS Studio screen rec
 
 - Windows 10/11
 - Python 3.10+
-- [auto-editor](https://github.com/WyattBlue/auto-editor) v29+ (`auto-editor.exe` in the same folder as the script, or on PATH)
-- FFmpeg (bundled with auto-editor)
+- [auto-editor](https://github.com/WyattBlue/auto-editor) v29+ — `pip install auto-editor`, an `auto-editor.exe` next to the script, or `auto-editor` on PATH (resolved in that order)
+- FFmpeg on PATH (`winget install Gyan.FFmpeg`)
 
 ## Usage
 
-1. Place `auto-editor.exe` in the same folder as `autocut.pyw`
+1. Install auto-editor (`pip install auto-editor`) or place `auto-editor.exe` in the same folder as `autocut.pyw`
 2. Double-click `autocut.pyw` or run: `pythonw autocut.pyw`
 3. Select your OBS clips, pick a preset, and hit **Process**
 4. Import the resulting `.fcpxml` files into DaVinci Resolve via **File → Import → Timeline**

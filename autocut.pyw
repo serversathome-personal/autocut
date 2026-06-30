@@ -57,6 +57,27 @@ AUTO_EDITOR_EXE = SCRIPTS_DIR / "auto-editor.exe"
 CONFIG_FILE = SCRIPTS_DIR / "auto-editor-gui-config.json"
 VIDEOS_DIR = Path.home() / "Videos"
 
+
+def auto_editor_base_cmd() -> list[str]:
+    """Resolve how to invoke auto-editor.
+
+    Order of preference: a copy next to this script, then any auto-editor on
+    PATH, then the installed module run with the current Python interpreter.
+    """
+    if AUTO_EDITOR_EXE.is_file():
+        return [str(AUTO_EDITOR_EXE)]
+    found = shutil.which("auto-editor")
+    if found:
+        return [found]
+    return [sys.executable, "-m", "auto_editor"]
+
+
+def auto_editor_available() -> bool:
+    if AUTO_EDITOR_EXE.is_file() or shutil.which("auto-editor"):
+        return True
+    import importlib.util
+    return importlib.util.find_spec("auto_editor") is not None
+
 PRESETS = {
     "Tutorial (default)": {"threshold": 4, "margin_before": 0.20, "margin_after": 0.30},
     "Fast-paced":         {"threshold": 4, "margin_before": 0.10, "margin_after": 0.15},
@@ -90,11 +111,11 @@ def check_dependencies() -> list[str]:
             "Install via:  winget install Gyan.FFmpeg\n"
             "or download from https://www.gyan.dev/ffmpeg/builds/"
         )
-    if not AUTO_EDITOR_EXE.is_file():
+    if not auto_editor_available():
         errors.append(
-            f"auto-editor.exe not found at:\n{AUTO_EDITOR_EXE}\n\n"
+            "auto-editor not found.\n\n"
             "Install via:  pip install auto-editor\n"
-            "Then copy the binary to the scripts folder, or download from\n"
+            "or place auto-editor.exe next to this script, or download from\n"
             "https://github.com/WyattBlue/auto-editor/releases"
         )
     return errors
@@ -585,7 +606,7 @@ class App:
         mb = self.var_margin_before.get()
         ma = self.var_margin_after.get()
 
-        cmd = [str(AUTO_EDITOR_EXE)]
+        cmd = auto_editor_base_cmd()
         cmd.append(input_path)
         cmd.extend(["--edit", f"audio:{threshold}"])
         cmd.extend(["--margin", f"{mb}s,{ma}s"])
