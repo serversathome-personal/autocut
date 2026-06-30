@@ -796,8 +796,11 @@ class App:
                 self._process = None
 
         # --- Combine timelines if batch + XML mode -------------------------
+        # Note: this runs on whatever clips succeeded even if some failed —
+        # a clip that's entirely silent ("Timeline is empty") is skipped, not
+        # allowed to block the combined timeline for the rest of the batch.
         combined_path = ""
-        if (all_ok and not self._cancel_flag and is_xml
+        if (not self._cancel_flag and is_xml
                 and len(individual_xmls) > 1):
             pname = (self.var_project_name.get().strip()
                      if use_pf else "combined")
@@ -834,29 +837,41 @@ class App:
 
         if self._cancel_flag:
             self.root.after(0, self.var_status.set, "Cancelled")
-        elif all_ok:
-            if is_xml:
+        elif is_xml and individual_xmls:
+            n_ok = len(individual_xmls)
+            n_skipped = total - n_ok
+            if n_skipped:
+                self.root.after(
+                    0, self.var_status.set,
+                    f"Done \u2014 {n_ok}/{total} clips ({n_skipped} skipped, "
+                    "see log) \u2192 import in DaVinci Resolve",
+                )
+            else:
                 self.root.after(
                     0, self.var_status.set,
                     "Done!  Next: DaVinci Resolve \u2192 File \u2192 Import \u2192 Timeline",
                 )
-                msg = "Processing complete!\n\n"
-                if combined_path:
-                    msg += (
-                        f"Combined timeline:\n"
-                        f"{Path(combined_path).name}\n\n"
-                    )
-                if use_pf:
-                    msg += f"Project folder:\n{self._output_dir}\n\n"
+            msg = "Processing complete!\n\n"
+            if n_skipped:
                 msg += (
-                    "To import:\n"
-                    "  1. Open DaVinci Resolve\n"
-                    "  2. File \u2192 Import \u2192 Timeline\n"
-                    "  3. Select the combined .fcpxml file"
+                    f"{n_ok} of {total} clips processed; "
+                    f"{n_skipped} skipped (empty or failed \u2014 see log).\n\n"
                 )
-                self.root.after(0, lambda: messagebox.showinfo("Done!", msg))
-            else:
-                self.root.after(0, self.var_status.set, "Done!")
+            if combined_path:
+                msg += f"Combined timeline:\n{Path(combined_path).name}\n\n"
+            if use_pf:
+                msg += f"Project folder:\n{self._output_dir}\n\n"
+            msg += (
+                "To import:\n"
+                "  1. Open DaVinci Resolve\n"
+                "  2. File \u2192 Import \u2192 Timeline\n"
+                "  3. Select the "
+                + ("combined " if combined_path else "")
+                + ".fcpxml file"
+            )
+            self.root.after(0, lambda: messagebox.showinfo("Done!", msg))
+        elif all_ok:
+            self.root.after(0, self.var_status.set, "Done!")
         else:
             self.root.after(0, self.var_status.set, "Finished with errors (see log)")
 
